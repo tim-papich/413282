@@ -62,9 +62,9 @@ const Home = ({ user, logout }) => {
     });
   };
 
-  const postMessage = (body) => {
+  const postMessage = async (body) => {
     try {
-      const data = saveMessage(body);
+      const data = await saveMessage(body);
 
       if (!body.conversationId) {
         addNewConvo(body.recipientId, data.message);
@@ -106,13 +106,14 @@ const Home = ({ user, logout }) => {
         setConversations((prev) => [newConvo, ...prev]);
       }
 
-      conversations.forEach((convo) => {
+      const updatedConversations = conversations.map((convo) => {
         if (convo.id === message.conversationId) {
-          convo.messages.push(message);
-          convo.latestMessageText = message.text;
+          return { ...convo, messages: convo.messages.concat([message]), latestMessageText: message.text }
         }
-      });
-      setConversations(conversations);
+        return convo;
+      })
+
+      setConversations(updatedConversations);
     },
     [setConversations, conversations]
   );
@@ -198,6 +199,7 @@ const Home = ({ user, logout }) => {
       await logout(user.id);
     }
   };
+
 
   return (
     <>
