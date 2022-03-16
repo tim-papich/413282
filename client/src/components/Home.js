@@ -73,6 +73,7 @@ const Home = ({ user, logout }) => {
       }
 
       sendMessage(data, body);
+      
     } catch (error) {
       console.error(error);
     }
@@ -80,14 +81,15 @@ const Home = ({ user, logout }) => {
 
   const addNewConvo = useCallback(
     (recipientId, message) => {
-      conversations.forEach((convo) => {
+
+      const updatedConversations = conversations.map((convo) => {
         if (convo.otherUser.id === recipientId) {
-          convo.messages.push(message);
-          convo.latestMessageText = message.text;
-          convo.id = message.conversationId;
+          return { ...convo, messages: convo.messages.concat([message]), latestMessageText: message.text, id: message.conversationId }
         }
+        return convo;
       });
-      setConversations(conversations);
+
+      setConversations(updatedConversations);
     },
     [setConversations, conversations]
   );
@@ -101,19 +103,22 @@ const Home = ({ user, logout }) => {
           id: message.conversationId,
           otherUser: sender,
           messages: [message],
+          latestMessageText: message.text
         };
-        newConvo.latestMessageText = message.text;
-        setConversations((prev) => [newConvo, ...prev]);
+        
+        setConversations([...conversations, newConvo]);
+        clearSearchedUsers();
+      } else {
+        const updatedConversations = conversations.map((convo) => {
+          if (convo.id === message.conversationId) {
+            return { ...convo, messages: convo.messages.concat([message]), latestMessageText: message.text }
+          }
+          return convo;
+        })
+  
+        setConversations(updatedConversations);
       }
 
-      const updatedConversations = conversations.map((convo) => {
-        if (convo.id === message.conversationId) {
-          return { ...convo, messages: convo.messages.concat([message]), latestMessageText: message.text }
-        }
-        return convo;
-      })
-
-      setConversations(updatedConversations);
     },
     [setConversations, conversations]
   );
