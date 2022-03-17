@@ -84,10 +84,15 @@ const Home = ({ user, logout }) => {
 
       const updatedConversations = conversations.map((convo) => {
         if (convo.otherUser.id === recipientId) {
-          return { ...convo, messages: convo.messages.concat([message]), latestMessageText: message.text, id: message.conversationId }
+          const convoCopy = { ...convo };
+          convoCopy.messages = convo.messages.concat([message]);
+          convoCopy.latestMessageText = message.text;
+          convoCopy.id = message.conversationId;
+          convoCopy.updatedAt = message.createdAt;
+          return convoCopy;
         }
         return convo;
-      });
+      }).sort((a,b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 
       setConversations(updatedConversations);
     },
@@ -103,15 +108,21 @@ const Home = ({ user, logout }) => {
           id: message.conversationId,
           otherUser: sender,
           messages: [message],
-          latestMessageText: message.text
+          latestMessageText: message.text,
+          updatedAt: message.createdAt
         };
         
-        setConversations([...conversations, newConvo]);
+        setConversations([newConvo, ...conversations]);
         clearSearchedUsers();
+        
       } else {
         const updatedConversations = conversations.map((convo) => {
           if (convo.id === message.conversationId) {
-            return { ...convo, messages: convo.messages.concat([message]), latestMessageText: message.text }
+            const convoCopy = { ...convo };
+            convoCopy.messages = convo.messages.concat([message]);
+            convoCopy.latestMessageText = message.text;
+            convoCopy.updatedAt = message.createdAt;
+            return convoCopy;
           }
           return convo;
         })
