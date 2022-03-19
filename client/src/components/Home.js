@@ -62,9 +62,9 @@ const Home = ({ user, logout }) => {
     });
   };
 
-  const postMessage = (body) => {
+  const postMessage = async (body) => {
     try {
-      const data = saveMessage(body);
+      const data = await saveMessage(body);
 
       if (!body.conversationId) {
         addNewConvo(body.recipientId, data.message);
@@ -73,6 +73,7 @@ const Home = ({ user, logout }) => {
       }
 
       sendMessage(data, body);
+      
     } catch (error) {
       console.error(error);
     }
@@ -80,14 +81,19 @@ const Home = ({ user, logout }) => {
 
   const addNewConvo = useCallback(
     (recipientId, message) => {
-      conversations.forEach((convo) => {
+
+      const updatedConversations = conversations.map((convo) => {
         if (convo.otherUser.id === recipientId) {
-          convo.messages.push(message);
-          convo.latestMessageText = message.text;
-          convo.id = message.conversationId;
+          const convoCopy = { ...convo };
+          convoCopy.messages = [ ...convo.messages, message];
+          convoCopy.latestMessageText = message.text;
+          convoCopy.id = message.conversationId;
+          return convoCopy;
         }
+        return convo;
       });
-      setConversations(conversations);
+
+      setConversations(updatedConversations);
     },
     [setConversations, conversations]
   );
@@ -101,18 +107,27 @@ const Home = ({ user, logout }) => {
           id: message.conversationId,
           otherUser: sender,
           messages: [message],
+          latestMessageText: message.text
         };
-        newConvo.latestMessageText = message.text;
-        setConversations((prev) => [newConvo, ...prev]);
+        
+        setConversations([newConvo, ...conversations]);
+        clearSearchedUsers();
+        
+      } else {
+        const updatedConversations = conversations.map((convo) => {
+          if (convo.id === message.conversationId) {
+            const convoCopy = { ...convo };
+            convoCopy.messages = [ ...convo.messages, message ];
+            convoCopy.latestMessageText = message.text;
+            convoCopy.updatedAt = message.createdAt;
+            return convoCopy;
+          }
+          return convo;
+        })
+  
+        setConversations(updatedConversations);
       }
 
-      conversations.forEach((convo) => {
-        if (convo.id === message.conversationId) {
-          convo.messages.push(message);
-          convo.latestMessageText = message.text;
-        }
-      });
-      setConversations(conversations);
     },
     [setConversations, conversations]
   );
@@ -198,6 +213,7 @@ const Home = ({ user, logout }) => {
       await logout(user.id);
     }
   };
+
 
   return (
     <>
