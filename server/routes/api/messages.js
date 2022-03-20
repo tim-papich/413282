@@ -57,11 +57,14 @@ router.post("/read", async (req, res, next) => {
         [Op.not]: {
           senderId: recipientId
         },
+        isUnread: true,
         conversationId: conversationId
-      }
+      },
+      returning: true
     });
 
-    res.json({ messages });
+    // return the messages that were updated
+    res.json({messages: messages[1], conversationId: conversationId});
   } catch (error) {
     next(error);
   }

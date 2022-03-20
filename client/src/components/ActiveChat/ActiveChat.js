@@ -22,14 +22,14 @@ const useStyles = makeStyles(() => ({
 const ActiveChat = ({
   user,
   conversations,
-  activeConversation,
+  activeConversationId,
   postMessage,
 }) => {
   const classes = useStyles();
 
   const conversation = conversations
     ? conversations.find(
-        (conversation) => conversation.otherUser.username === activeConversation
+        (conversation) => conversation.id === activeConversationId
       )
     : {};
 
