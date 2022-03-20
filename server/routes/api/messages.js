@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const { Op } = require("sequelize");
 const { Conversation, Message } = require("../../db/models");
 const onlineUsers = require("../../onlineUsers");
 
@@ -53,12 +54,10 @@ router.post("/read", async (req, res, next) => {
 
     const messages = await Message.update({ isUnread: false }, {
       where: {
-        user2Id: {
-          recipientId
+        [Op.not]: {
+          senderId: recipientId
         },
-        conversationId: {
-          conversationId
-        }
+        conversationId: conversationId
       }
     });
 

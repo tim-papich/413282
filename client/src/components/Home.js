@@ -167,7 +167,7 @@ const Home = ({ user, logout }) => {
 
   const setActiveChat = (username, conversationId) => {
     setActiveConversation(username);
-    postRead(conversationId);
+    postRead({conversationId});
   };
 
   const addOnlineUser = useCallback((id) => {

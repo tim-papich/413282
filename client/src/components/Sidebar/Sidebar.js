@@ -19,7 +19,6 @@ const useStyles = makeStyles(() => ({
 }));
 
 function getNumUnreadMessages(conversation, user) {
-  console.log(conversation)
   return conversation.messages.filter(msg => msg.isUnread && msg.senderId !== user.id).length
 }
 
