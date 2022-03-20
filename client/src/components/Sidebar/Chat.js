@@ -23,7 +23,7 @@ const Chat = ({ conversation, setActiveChat, unreadCount }) => {
   const { otherUser } = conversation;
 
   const handleClick = async (conversation) => {
-    await setActiveChat(conversation);
+    await setActiveChat(conversation.otherUser.username);
   };
 
   return (

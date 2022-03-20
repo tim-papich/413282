@@ -22,14 +22,15 @@ const useStyles = makeStyles(() => ({
 const ActiveChat = ({
   user,
   conversations,
-  activeConversationId,
+  activeConversation,
   postMessage,
+  postRead
 }) => {
   const classes = useStyles();
 
   const conversation = conversations
     ? conversations.find(
-        (conversation) => conversation.id === activeConversationId
+        (conversation) => conversation.otherUser.username === activeConversation
       )
     : {};
 
@@ -52,6 +53,7 @@ const ActiveChat = ({
                   messages={conversation.messages}
                   otherUser={conversation.otherUser}
                   userId={user.id}
+                  postRead={postRead}
                 />
                 <Input
                   otherUser={conversation.otherUser}

@@ -20,7 +20,7 @@ const Home = ({ user, logout }) => {
   const socket = useContext(SocketContext);
 
   const [conversations, setConversations] = useState([]);
-  const [activeConversationId, setActiveConversationId] = useState(null);
+  const [activeConversation, setactiveConversation] = useState(null);
 
   const classes = useStyles();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -78,6 +78,17 @@ const Home = ({ user, logout }) => {
     }
   };
 
+  const postRead = async (body) => {
+    try {
+      const data = await readMessage(body);
+      markAsRead(data);
+      sendRead(data, body);
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const addNewConvo = useCallback(
     (recipientId, message) => {
 
@@ -124,9 +135,6 @@ const Home = ({ user, logout }) => {
         })
   
         setConversations(updatedConversations);
-        if ( message.conversationId === activeConversationId) {
-          postRead({conversationId: message.conversationId, recipientId: message.senderId});
-        }
       }
 
     },
@@ -143,17 +151,6 @@ const Home = ({ user, logout }) => {
       messages: data.messages,
       conversationId: body.conversationId
     });
-  };
-
-  const postRead = async (body) => {
-    try {
-      const data = await readMessage(body);
-      markAsRead(data);
-      sendRead(data, body);
-
-    } catch (error) {
-      console.error(error);
-    }
   };
 
   const markAsRead = useCallback(
@@ -182,9 +179,8 @@ const Home = ({ user, logout }) => {
     [setConversations, conversations]
   )
 
-  const setActiveChat = (conversation) => {
-    setActiveConversationId(conversation.id);
-    postRead({conversationId: conversation.id, recipientId: conversation.otherUser.id});
+  const setActiveChat = (username) => {
+    setactiveConversation(username);
   };
 
   const addOnlineUser = useCallback((id) => {
@@ -281,10 +277,11 @@ const Home = ({ user, logout }) => {
           setActiveChat={setActiveChat}
         />
         <ActiveChat
-          activeConversationId={activeConversationId}
+          activeConversation={activeConversation}
           conversations={conversations}
           user={user}
           postMessage={postMessage}
+          postRead={postRead}
         />
       </Grid>
     </>

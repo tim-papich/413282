@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box } from '@material-ui/core';
 import { SenderBubble, OtherUserBubble } from '.';
 import moment from 'moment';
@@ -10,12 +10,18 @@ function findOtherUserLastReadMessageId(messages, userId) {
 }
 
 const Messages = (props) => {
-  const { messages, otherUser, userId } = props;
+  const { messages, otherUser, userId, postRead } = props;
   const lastReadId = findOtherUserLastReadMessageId(messages, userId);
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      postRead({conversationId: messages[0].conversationId, recipientId: otherUser.id});
+    }
+  }, [messages, otherUser.id, postRead]);
 
   return (
     <Box>
-      {messages.map((message, index) => {
+      {messages.map((message) => {
         const time = moment(message.createdAt).format('h:mm');
         const lastRead = message.id === lastReadId;
 
