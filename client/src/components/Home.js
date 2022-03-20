@@ -132,8 +132,42 @@ const Home = ({ user, logout }) => {
     [setConversations, conversations]
   );
 
-  const setActiveChat = (username) => {
+  const readMessage = async (body) => {
+    const { data } = await axios.post('/api/messages/read', body);
+    console.log(data)
+    return data;
+  };
+
+  const sendRead = (data, body) => {
+    console.log('emit data')
+    socket.emit('read-message', {
+      messageId: data.messageId
+    });
+  };
+
+  const postRead = async (body) => {
+    try {
+      const data = await readMessage(body);
+
+      markAsRead(data);
+
+      // sendMessage(data, body);
+      
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const markAsRead = useCallback(
+    (data) => {
+      console.log('mark as read');
+    }, 
+    []
+  )
+
+  const setActiveChat = (username, conversationId) => {
     setActiveConversation(username);
+    postRead(conversationId);
   };
 
   const addOnlineUser = useCallback((id) => {
@@ -163,14 +197,15 @@ const Home = ({ user, logout }) => {
       })
     );
   }, []);
-
+ 
   // Lifecycle
-
+ 
   useEffect(() => {
     // Socket init
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
+    socket.on('read-message', markAsRead);
 
     return () => {
       // before the component is destroyed
@@ -178,6 +213,7 @@ const Home = ({ user, logout }) => {
       socket.off('add-online-user', addOnlineUser);
       socket.off('remove-offline-user', removeOfflineUser);
       socket.off('new-message', addMessageToConversation);
+      socket.off('read-message', markAsRead);
     };
   }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket]);
 

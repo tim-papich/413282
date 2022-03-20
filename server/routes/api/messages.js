@@ -43,4 +43,29 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+router.post("/read", async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.sendStatus(401);
+    }
+    const recipientId = req.user.id;
+    const { conversationId } = req.body;
+
+    const messages = await Message.update({ isUnread: false }, {
+      where: {
+        user2Id: {
+          recipientId
+        },
+        conversationId: {
+          conversationId
+        }
+      }
+    });
+
+    res.json({ messages });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
