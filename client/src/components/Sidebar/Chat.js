@@ -34,8 +34,8 @@ const Chat = ({ conversation, setActiveChat, unreadCount }) => {
         online={otherUser.online}
         sidebar={true}
       />
-      <ChatContent conversation={conversation} />
-      <UnreadBubble unreadCount={unreadCount} />
+      <ChatContent conversation={conversation} boldPreviewText={conversation.unreadCount > 0} />
+      <UnreadBubble unreadCount={conversation.unreadCount} />
     </Box>
   );
 };

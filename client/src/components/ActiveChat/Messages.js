@@ -3,15 +3,8 @@ import { Box } from '@material-ui/core';
 import { SenderBubble, OtherUserBubble } from '.';
 import moment from 'moment';
 
-function findOtherUserLastReadMessageId(messages, userId) {
-  const messagesCopy = [...messages];
-  const index = messagesCopy.reverse().findIndex((msg) => msg.isUnread === false && msg.senderId === userId);
-  return messagesCopy[index]?.id
-}
-
 const Messages = (props) => {
-  const { messages, otherUser, userId, postRead } = props;
-  const lastReadId = findOtherUserLastReadMessageId(messages, userId);
+  const { messages, otherUser, userId, postRead, lastReadId } = props;
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -21,7 +14,7 @@ const Messages = (props) => {
 
   return (
     <Box>
-      {messages.map((message) => {
+      {messages.map((message, index) => {
         const time = moment(message.createdAt).format('h:mm');
         const lastRead = message.id === lastReadId;
 

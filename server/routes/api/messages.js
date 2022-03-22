@@ -44,13 +44,23 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-router.post("/read", async (req, res, next) => {
+router.put("/read", async (req, res, next) => {
   try {
     if (!req.user) {
       return res.sendStatus(401);
     }
     const recipientId = req.user.id;
     const { conversationId } = req.body;
+
+    const conversation = await Conversation.findOne({
+      where: {
+        id: conversationId
+      }
+    });
+
+    if (conversation.user1Id !== recipientId && conversation.user2Id !== recipientId) {
+      return res.sendStatus(401);
+    }
 
     const messages = await Message.update({ isUnread: false }, {
       where: {

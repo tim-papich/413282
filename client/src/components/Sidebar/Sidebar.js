@@ -18,10 +18,6 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-function getNumUnreadMessages(conversation, user) {
-  return conversation.messages.filter(msg => msg.isUnread && msg.senderId !== user.id).length
-}
-
 const Sidebar = ({
   handleChange,
   searchTerm,
@@ -44,7 +40,6 @@ const Sidebar = ({
           return (
             <Chat
               conversation={conversation}
-              unreadCount={getNumUnreadMessages(conversation, user)}
               key={conversation.otherUser.username}
               setActiveChat={setActiveChat}
             />

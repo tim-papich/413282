@@ -14,6 +14,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+function findLastReadMessageId(messages, userId) {
+  const messagesCopy = [...messages];
+  const index = messagesCopy.reverse().findIndex((msg) => msg.isUnread === false && msg.senderId === userId);
+  return messagesCopy[index]?.id
+}
+
 const Home = ({ user, logout }) => {
   const history = useHistory();
 
@@ -98,6 +104,7 @@ const Home = ({ user, logout }) => {
           convoCopy.messages = [ ...convo.messages, message];
           convoCopy.latestMessageText = message.text;
           convoCopy.id = message.conversationId;
+          convoCopy.lastReadId = findLastReadMessageId(convoCopy.messages, user.id);
           return convoCopy;
         }
         return convo;
@@ -117,7 +124,8 @@ const Home = ({ user, logout }) => {
           id: message.conversationId,
           otherUser: sender,
           messages: [message],
-          latestMessageText: message.text
+          latestMessageText: message.text,
+          unreadCount: 1
         };
         
         setConversations([newConvo, ...conversations]);
@@ -129,6 +137,8 @@ const Home = ({ user, logout }) => {
             convoCopy.messages = [ ...convo.messages, message ];
             convoCopy.latestMessageText = message.text;
             convoCopy.updatedAt = message.createdAt;
+            convoCopy.unreadCount = convoCopy.messages.filter((msg) => msg.isUnread && msg.senderId !== user.id).length;
+            convoCopy.lastReadId = findLastReadMessageId(convoCopy.messages, user.id)
             return convoCopy;
           }
           return convo;
@@ -138,11 +148,11 @@ const Home = ({ user, logout }) => {
       }
 
     },
-    [setConversations, conversations]
+    [setConversations, conversations, user.id]
   );
 
   const readMessage = async (body) => {
-    const { data } = await axios.post('/api/messages/read', body);
+    const { data } = await axios.put('/api/messages/read', body);
     return data;
   };
 
@@ -156,27 +166,24 @@ const Home = ({ user, logout }) => {
   const markAsRead = useCallback(
     (data) => {
       const { messages, conversationId } = data;
-      const messageIds = messages.map(msg => msg.id);
 
       if (messages.length > 0) {
         const updatedConversations = conversations.map((convo) => {
           const convoCopy = { ...convo };
           if (convoCopy.id === conversationId) {
             convoCopy.messages = convoCopy.messages.map((msg) => {
-              const msgCopy = {...msg};
-              if (messageIds.includes(msgCopy.id)) {
-                return {...msgCopy, isUnread: false}
-              }
-              return msgCopy;
+              const msgCopy = { ...msg };
+              return { ...msgCopy, isUnread: false }
             });
+            return { ...convoCopy, unreadCount: 0, lastReadId: findLastReadMessageId(convoCopy.messages, user.id) };
           }
-          return convoCopy;
+          return convo;
         })
 
         setConversations(updatedConversations);
       }
     }, 
-    [setConversations, conversations]
+    [setConversations, conversations, user.id]
   )
 
   const setActiveChat = (username) => {
