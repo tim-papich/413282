@@ -137,7 +137,7 @@ const Home = ({ user, logout }) => {
             convoCopy.messages = [ ...convo.messages, message ];
             convoCopy.latestMessageText = message.text;
             convoCopy.updatedAt = message.createdAt;
-            convoCopy.unreadCount = convoCopy.messages.filter((msg) => msg.isUnread && msg.senderId !== user.id).length;
+            convoCopy.unreadCount = message.senderId !== user.id ? convoCopy.unreadCount + 1 : 0;
             convoCopy.lastReadId = findLastReadMessageId(convoCopy.messages, user.id)
             return convoCopy;
           }

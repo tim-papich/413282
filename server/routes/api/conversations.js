@@ -71,6 +71,9 @@ router.get("/", async (req, res, next) => {
       conversations[i] = convoJSON;
       conversations[i].updatedAt = convoJSON.messages[convoJSON.messages.length - 1].createdAt;
 
+      // set properties for unreadCount
+      conversations[i].unreadCount = convoJSON.messages.filter((msg) => msg.isUnread && msg.senderId !== userId).length;
+
       // set property for last read message
       const messagesCopy = [...convoJSON.messages];
       const index = messagesCopy.reverse().findIndex((msg) => msg.isUnread === false && msg.senderId === userId);

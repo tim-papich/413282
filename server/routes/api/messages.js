@@ -59,7 +59,7 @@ router.put("/read", async (req, res, next) => {
     });
 
     if (conversation.user1Id !== recipientId && conversation.user2Id !== recipientId) {
-      return res.sendStatus(401);
+      return res.sendStatus(403);
     }
 
     const messages = await Message.update({ isUnread: false }, {
