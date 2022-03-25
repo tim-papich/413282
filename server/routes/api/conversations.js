@@ -13,17 +13,14 @@ router.get("/", async (req, res, next) => {
     const userId = req.user.id;
     const conversations = await Conversation.findAll({
       where: {
-        [Op.or]: {
-          user1Id: userId,
-          user2Id: userId,
-        },
+        [Op.contains]: userId 
       },
       attributes: ["id"],
       include: [
         { model: Message, order: ["createdAt", "DESC"] },
         {
           model: User,
-          as: "user1",
+          as: "users",
           where: {
             id: {
               [Op.not]: userId,
@@ -31,18 +28,7 @@ router.get("/", async (req, res, next) => {
           },
           attributes: ["id", "username", "photoUrl"],
           required: false,
-        },
-        {
-          model: User,
-          as: "user2",
-          where: {
-            id: {
-              [Op.not]: userId,
-            },
-          },
-          attributes: ["id", "username", "photoUrl"],
-          required: false,
-        },
+        }
       ],
     });
 
@@ -50,20 +36,17 @@ router.get("/", async (req, res, next) => {
       const convo = conversations[i];
       const convoJSON = convo.toJSON();
 
-      // set a property "otherUser" so that frontend will have easier access
-      if (convoJSON.user1) {
-        convoJSON.otherUser = convoJSON.user1;
-        delete convoJSON.user1;
-      } else if (convoJSON.user2) {
-        convoJSON.otherUser = convoJSON.user2;
-        delete convoJSON.user2;
-      }
-
-      // set property for online status of the other user
-      if (onlineUsers.includes(convoJSON.otherUser.id)) {
-        convoJSON.otherUser.online = true;
-      } else {
-        convoJSON.otherUser.online = false;
+      // set a property "otherUsers" so that frontend will have easier access
+      if (convoJSON.users) {
+        convoJSON.users.forEach((user) => {
+          if (onlineUsers.includes(user.id)) {
+            user.online = true;
+          } else {
+            user.online = false;
+          }
+          convoJSON.otherUsers.push(user);
+          delete user;
+        });
       }
 
       // set properties for notification count and latest message preview
