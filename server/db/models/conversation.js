@@ -3,12 +3,17 @@ const db = require("../db");
 
 const Conversation = db.define("conversation", {});
 
-// find conversation given array of userIds
+// find conversation given two user Ids
 
-Conversation.findConversation = async function (userIds) {
+Conversation.findConversation = async function (user1Id, user2Id) {
   const conversation = await Conversation.findOne({
     where: {
-      userIds: userIds
+      user1Id: {
+        [Op.or]: [user1Id, user2Id]
+      },
+      user2Id: {
+        [Op.or]: [user1Id, user2Id]
+      }
     }
   });
 

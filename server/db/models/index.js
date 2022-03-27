@@ -4,14 +4,20 @@ const Message = require("./message");
 
 // associations
 
-User.hasMany(Conversation);
-Conversation.belongsTo(User, { as: "user1" });
-Conversation.belongsTo(User, { as: "user2" });
-Message.belongsTo(Conversation);
+User.belongsToMany(Conversation, { through: Group });
+Conversation.belongsToMany(User, { through: Group });
 Conversation.hasMany(Message);
+Message.belongsTo(Conversation);
 
 module.exports = {
   User,
   Conversation,
   Message
 };
+
+users groups messages
+group has many users
+users have many groups
+a message has one user
+a message has one group
+a group had many messages
